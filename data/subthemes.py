@@ -13,3 +13,5 @@ class Subtheme(SqlAlchemyBase, SerializerMixin):
     description = sqlalchemy.Column(sqlalchemy.String)
     tasks = orm.relationship('Task', back_populates="subtheme")
     test = orm.relation('Test', back_populates="subthemes")
+
+

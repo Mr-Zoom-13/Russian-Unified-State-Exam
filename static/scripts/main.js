@@ -18,14 +18,14 @@ $(document).ready(function () {
                 return response.json();
             })
             .then((myjson) => {
-                subthemes = myjson.subthemes
+                subthemes = myjson.test.subthemes
                 console.log(subthemes)
                 parent = $('#parent')
                 parent.empty()
                 parent.append(`<h1 class="h1_title">Подтемы тестов</h1><div class="tests_themes"></div>`)
                 parent_div = $('.tests_themes')
                 for (var i = 0; i < subthemes.length; i++) {
-                    parent_div.append(`<h1 class="test_theme_and_subtheme" data-test-id="${myjson.id}" data-subtheme-id="${subthemes[i].id}" onclick="start_testing(this)">${i + 1}. ${subthemes[i].title}</h1>`)
+                    parent_div.append(`<h1 class="test_theme_and_subtheme" data-test-id="${myjson.test.id}" data-subtheme-id="${subthemes[i].id}" onclick="start_testing(this)">${i + 1}. ${subthemes[i].title}</h1>`)
                 }
             });
     }

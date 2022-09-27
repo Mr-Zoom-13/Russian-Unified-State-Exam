@@ -1,12 +1,13 @@
 import random
-import json
-import os
 from flask import Flask, render_template, redirect, session, jsonify
 from flask_login import LoginManager, login_required, logout_user, login_user
 from data import db_session
 from forms.login import LoginForm
 from forms.register import RegisterForm
 from data.users import User
+from data.tests import Test
+from data.subthemes import Subtheme
+
 
 app = Flask(__name__)
 app.secret_key = 'very secret key pam'
@@ -64,15 +65,7 @@ def register_user():
 
 @app.route('/main')
 def main_page():
-    current_dir = str(os.getcwd())
-    os.chdir(current_dir + '/tests')
-    titles = []
-    files = os.listdir()
-    for i in range(len(files)):
-        f = json.load(open(str(i + 1) + '.json', encoding='utf-8'))
-        titles.append(f['title'])
-    os.chdir(current_dir)
-    return render_template('main.html', titles=titles)
+    return render_template('main.html')
 
 
 #API
@@ -83,34 +76,27 @@ def get_user_id():
 
 @app.route('/api/get-test/<int:test_id>', methods=['GET', 'POST'])
 def get_test(test_id):
-    current_dir = str(os.getcwd())
-    os.chdir(current_dir + '/tests')
+    db_ses = db_session.create_session()
     if test_id == 0:
-        f = {'tests': []}
-        for i in os.listdir():
-            f['tests'].append(json.load(open(i, encoding='utf-8')))
+        f = {'tests': [test.to_dict(rules=('-subthemes.test', '-subthemes.tasks.subtheme')) for test in db_ses.query(Test).all()]}
     else:
-        f = json.load(open(str(test_id) + '.json', encoding='utf-8'))
-    os.chdir(current_dir)
+        f = {'test': db_ses.query(Test).get(test_id).to_dict(rules=('-subthemes.test', '-subthemes.tasks.subtheme'))}
     return jsonify(f)
 
 
 @app.route('/api/start-test/<int:user_id>/<int:test_id>/<int:subtheme_id>', methods=['GET', 'POST'])
 def start_test(user_id, test_id, subtheme_id):
     db_ses = db_session.create_session()
-    current_dir = str(os.getcwd())
-    os.chdir(current_dir + '/tests')
-    f = json.load(open(str(test_id) + '.json', encoding='utf-8'))
+    f = db_ses.query(Subtheme).get(subtheme_id)
     user = db_ses.query(User).get(user_id)
-    tmp = f['subthemes'][subtheme_id]['tasks']
+    tmp = [task.task for task in f.tasks]
     random.shuffle(tmp)
     user.tasks = str(tmp)
     user.success = 0
     user.resolved = 0
     db_ses.commit()
-    os.chdir(current_dir)
     next_task_dict = next_task(user_id, -1, 0)
-    next_task_dict['description'] = f['subthemes'][subtheme_id]['description']
+    next_task_dict['description'] = f.description
     return next_task_dict
 
 
@@ -139,23 +125,5 @@ def next_task(user_id, last_task_id, last_status): # last_status: 0 - first task
 
 
 if __name__ == '__main__':
-    # last = str(os.getcwd())
-    # os.chdir(str(os.getcwd()) + '/tests')
-    # print(os.listdir())
-    # os.chdir(last)
     db_session.global_init('db/rus.db')
     app.run(port=5005)
-
-
-
-# {% extends "base.html" %}
-# {% block content %}
-# <div id="parent">
-#     <h1 class="h1_title">Темы тестов</h1>
-#     <div class="tests_themes">
-#         {% for i in range(titles|length) %}
-#         <h1 class="test_theme_and_subtheme" data-test-id="{{ i }}" onclick="open_test(this)">{{ i + 1 }}. {{ titles[i] }}</h1>
-#         {% endfor %}
-#     </div>
-# </div>
-# {% endblock %}

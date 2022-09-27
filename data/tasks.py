@@ -12,3 +12,4 @@ class Task(SqlAlchemyBase, SerializerMixin):
     task = sqlalchemy.Column(sqlalchemy.String, unique=True)
     subtheme = orm.relation('Subtheme', back_populates="tasks")
 
+
