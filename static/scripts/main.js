@@ -19,7 +19,6 @@ $(document).ready(function () {
             })
             .then((myjson) => {
                 subthemes = myjson.test.subthemes
-                console.log(subthemes)
                 parent = $('#parent')
                 parent.empty()
                 parent.append(`<h1 class="h1_title">Подтемы тестов</h1><div class="tests_themes"></div>`)
@@ -45,36 +44,33 @@ $(document).ready(function () {
 
     function check_right_answer(this_) {
         answer = $(this_).attr('data-symbol')
-        if (right_answer == answer) {
-            fetch(`/api/next-task/${user_id}/${task_id}/1`)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((myjson) => {
+
+        fetch(`/api/next-task/${user_id}/${task_pos}/${answer}`)
+            .then((response) => {
+                return response.json();
+            })
+            .then((myjson) => {
+                if (myjson.status == 'right') {
                     create_task(myjson)
-                });
-        } else {
-            fetch(`/api/next-task/${user_id}/${task_id}/2`)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((myjson) => {
+                } else {
+                    $(".can_choose_task").removeAttr('onclick')
+                    $(".can_choose_task").removeClass('can_choose_task')
                     trup = myjson
                     parent = $('#parent')
-                    first = task.slice(0, right_answer)
-                    second = task.slice(right_answer, right_answer + 2).slice(1)
-                    right_letter = task[right_answer].toUpperCase()
-                    parent.append(`<h2 class="task_description"><span class="wrong_answer">Неверно!</span> Правильный ответ: ${first}<span class="right_answer">${right_letter}</span>${second}</h2><div class="text-center"><input onclick="create_task(trup)" class="form-control btn btn-success btn_next" type="submit" value="Далее"></div>`)
-                });
-        }
+                    parent.append(`<h2 class="task_description"><span class="wrong_answer">Неверно!</span> Правильный ответ: ${myjson.first}<span class="right_answer">${myjson.right_letter}</span>${myjson.second}</h2><div class="text-center"><input onclick="create_task(trup)" class="form-control btn btn-success btn_next" type="submit" value="Далее"></div>`)
+
+                }
+            });
+
     }
 
 
-    function create_task(myjson) {
-        parent = $('#parent')
-        parent.empty()
-        if (Object.keys(myjson).includes('success')) {
-            parent.append(`
+
+function create_task(myjson) {
+    parent = $('#parent')
+    parent.empty()
+    if (Object.keys(myjson).includes('success')) {
+        parent.append(`
                 <h2 class="task_description">Вы успешно завершили тест! Ваша эффективность равна: ${myjson.success}/${myjson.resolved} или же ${Math.round(myjson.success / myjson.resolved * 100)}%!</h2>
                 <div class="text-center">
                     <input data-test-id="${test_id}" data-subtheme-id="${subtheme_id}" onclick="start_testing(this)" class="form-control btn btn-success btn_next task_again" type="submit" value="Заново ↺">
@@ -84,45 +80,42 @@ $(document).ready(function () {
                     <input data-test-id="${test_id}" onclick="open_test(this)" class="form-control btn btn-success btn_next" type="submit" value="Вернуться к подтемам">
                 </div>
             `)
-        } else {
-            task_id = Number(myjson.task_id)
-            task_json = myjson.task.split('/')
-            task = task_json[0]
-            right_answer = task_json[1]
-            parent.append(`<h3 class="task_description">${task_description}</h3><div class="task_div"></div>`)
-            parent_div = $('.task_div')
-            for (var i = 0; i < task.length; i++) {
-                if (vowels.includes(task[i])) {
-                    parent_div.append(`<h2 class="task can_choose_task" data-symbol='${i}' onclick="check_right_answer(this)">${task[i]}</h2>`)
-                } else {
-                    parent_div.append(`<h2 class="task">${task[i]}</h2>`)
-                }
+    } else {
+        task_pos = Number(myjson.task_pos)
+        task = myjson.task
+        parent.append(`<h3 class="task_description">${task_description}</h3><div class="task_div"></div>`)
+        parent_div = $('.task_div')
+        for (var i = 0; i < task.length; i++) {
+            if (vowels.includes(task[i])) {
+                parent_div.append(`<h2 class="task can_choose_task" data-symbol='${i}' onclick="check_right_answer(this)">${task[i]}</h2>`)
+            } else {
+                parent_div.append(`<h2 class="task">${task[i]}</h2>`)
             }
         }
-
     }
 
-    function open_tests() {
-        fetch('/api/get-test/0')
-            .then((response) => {
-                return response.json();
-            })
-            .then((myjson) => {
-                console.log(myjson)
-                parent = $('#parent')
-                parent.empty()
-                parent.append(`<h1 class="h1_title">Темы тестов</h1><div class="tests_themes"></div>`)
-                parent_div = $('.tests_themes')
-                for (var i = 0; i < myjson.tests.length; i++) {
-                    parent_div.append(`<h1 class="test_theme_and_subtheme" data-test-id="${myjson.tests[i].id}" onclick="open_test(this)">${i + 1}. ${myjson.tests[i].title}</h1>`)
-                }
-            });
-    }
+}
 
-    window.open_test = open_test
-    window.start_testing = start_testing
-    window.check_right_answer = check_right_answer
-    window.create_task = create_task
-    window.open_tests = open_tests
+function open_tests() {
+    fetch('/api/get-test/0')
+        .then((response) => {
+            return response.json();
+        })
+        .then((myjson) => {
+            parent = $('#parent')
+            parent.empty()
+            parent.append(`<h1 class="h1_title">Темы тестов</h1><div class="tests_themes"></div>`)
+            parent_div = $('.tests_themes')
+            for (var i = 0; i < myjson.tests.length; i++) {
+                parent_div.append(`<h1 class="test_theme_and_subtheme" data-test-id="${myjson.tests[i].id}" onclick="open_test(this)">${i + 1}. ${myjson.tests[i].title}</h1>`)
+            }
+        });
+}
+
+window.open_test = open_test
+window.start_testing = start_testing
+window.check_right_answer = check_right_answer
+window.create_task = create_task
+window.open_tests = open_tests
 })
 

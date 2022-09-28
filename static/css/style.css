@@ -67,3 +67,25 @@
 .task_again {
     background-color: darkorange!important;
 }
+
+.m-left {
+    margin-left: 5px;
+}
+
+.create-thing {
+    margin-top: 20px;
+}
+
+.custom-select {
+    min-width: 100px;
+    max-width: 75%;
+}
+
+#choose_right_letter {
+    margin-left: 20px;
+}
+
+.can_choose_task_hover {
+    color: #58a70a;
+    font-size: 40px;
+}
