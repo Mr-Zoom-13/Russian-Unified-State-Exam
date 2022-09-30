@@ -57,6 +57,7 @@
 
 .wrong_answer {
     color: red;
+    font-size: 38px;
 }
 
 .btn_next {
@@ -148,3 +149,56 @@
     width: fit-content;
 }
 
+
+
+
+
+.new_post_tag {
+    display: inline-block !important;
+    width: initial !important;
+    margin-right: 20px;
+}
+
+.new_post_tag_text {
+    display: inline-block !important;
+    background-color: deepskyblue !important;
+    color: white !important;
+}
+
+.new_post_tag_text_right {
+    display: inline-block !important;
+    background-color: #58a70a !important;
+    color: white !important;
+}
+
+.new_post_tag_delete {
+    display: inline-block;
+    cursor: pointer;
+    color: red;
+}
+
+.new_post_tag_right {
+    display: inline-block;
+    cursor: pointer;
+    color: yellowgreen;
+}
+
+#answer-list {
+    margin-top: 10px;
+}
+
+.choose_answer {
+    margin-right: 10px;
+}
+
+.choose_hover {
+    cursor: pointer;
+}
+
+.choose_hover:hover {
+    background-color: #58a70a!important;
+}
+
+.back_wrong_answer {
+    background-color: red!important;
+}

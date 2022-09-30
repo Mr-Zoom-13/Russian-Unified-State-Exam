@@ -90,7 +90,15 @@ def register_user():
 def main_page():
     if eval(current_user.tasks):
         db_ses = db_session.create_session()
-        return render_template('main.html', continue_task=1, task_pos=current_user.resolved, task=db_ses.query(Task).get(eval(current_user.tasks)[current_user.resolved]).task, test_id=current_user.test_id, subtheme_id=current_user.subtheme_id)
+        task = db_ses.query(Task).get(eval(current_user.tasks)[current_user.resolved])
+        if task.type_task == 0:
+            answers = []
+        else:
+            answers = '|'.join([i.answer for i in task.answers])
+        return render_template('main.html', continue_task=1, task_pos=current_user.resolved,
+                               task=task.task, test_id=current_user.test_id,
+                               subtheme_id=current_user.subtheme_id, type_task=task.type_task,
+                               answers=answers)
     return render_template('main.html')
 
 
@@ -111,8 +119,9 @@ def get_test(test_id):
     db_ses = db_session.create_session()
     if test_id == 0:
         f = {'tests': [test.to_dict(rules=(
-        '-subthemes.test', '-subthemes.tasks.subtheme', '-subthemes.tasks.answers.task')) for
-                       test in db_ses.query(Test).all()]}
+            '-subthemes.test', '-subthemes.tasks.subtheme', '-subthemes.tasks.answers.task'))
+            for
+            test in db_ses.query(Test).all()]}
     else:
         f = {'test': db_ses.query(Test).get(test_id).to_dict(
             rules=(
@@ -142,13 +151,13 @@ def start_test(user_id, test_id, subtheme_id):
 
 @app.route('/api/next-task/<int:user_id>/<int:task_pos>/<string:answer>',
            methods=['GET', 'POST'])
-def next_task(user_id, task_pos,
-              answer):  # last_status: 0 - first task, 1 - last task was right, 2 - last task was wrong
+def next_task(user_id, task_pos, answer):
     db_ses = db_session.create_session()
     user = db_ses.query(User).get(user_id)
     tasks = eval(user.tasks)
-    right_answer = db_ses.query(Answer).filter(Answer.right == 1, Answer.task_id == tasks[task_pos]).first()
-
+    right_answer = db_ses.query(Answer).filter(Answer.right == 1,
+                                               Answer.task_id == tasks[task_pos]).first()
+    current_task = db_ses.query(Task).get(tasks[task_pos])
     task_pos += 1
     if answer != '-1':
         user.resolved += 1
@@ -158,11 +167,7 @@ def next_task(user_id, task_pos,
         else:
             status = 'wrong'
     else:
-        return {'task_pos': task_pos, 'task': db_ses.query(Task).get(tasks[task_pos]).task}
-    if right_answer.task.type_task == 0:
-        first = right_answer.task.task[:int(right_answer.answer)]
-        second = right_answer.task.task[int(right_answer.answer) + 1:]
-        right_letter = right_answer.task.task[int(right_answer.answer)].upper()
+        status = 'right'
     if task_pos >= len(tasks):
         success = user.success
         resolved = user.resolved
@@ -170,13 +175,51 @@ def next_task(user_id, task_pos,
         user.resolved = 0
         user.tasks = '[]'
         db_ses.commit()
-        if right_answer.task.type_task == 0:
-            return jsonify({'success': success, 'resolved': resolved, 'status': status, 'first': first, 'second':second, 'right_letter': right_letter})
-        return jsonify({'success': success, 'resolved': resolved, 'status': status})
-    if right_answer.task.type_task == 0:
+        if status == 'wrong':
+            if current_task.type_task == 0:
+                first = current_task.task[:int(right_answer.answer)]
+                second = current_task.task[int(right_answer.answer) + 1:]
+                right_letter = current_task.task[int(right_answer.answer)].upper()
+            else:
+                index = current_task.task.index('...')
+                first = current_task.task[:index]
+                second = current_task.task[index + 3:]
+                right_letter = right_answer.answer.upper()
+            db_ses.commit()
+            return jsonify({'success': success, 'resolved': resolved, 'status': status,
+                            'first': first, 'second': second,
+                            'right_letter': right_letter})
         db_ses.commit()
-        return jsonify({'task_pos': task_pos, 'task': db_ses.query(Task).get(tasks[task_pos]).task, 'status': status, 'first': first, 'second':second, 'right_letter': right_letter})
-    return jsonify({'task_pos': task_pos, 'task': db_ses.query(Task).get(tasks[task_pos]).task, 'status': status})
+        return jsonify({'success': success, 'resolved': resolved, 'status': status})
+    else:
+        task = db_ses.query(Task).get(tasks[task_pos])
+        if task.type_task == 0:
+            answers = []
+        else:
+            answers = [i.answer for i in task.answers]
+        if status == 'wrong':
+            if current_task.type_task == 0:
+                first = current_task.task[:int(right_answer.answer)]
+                second = current_task.task[int(right_answer.answer) + 1:]
+                right_letter = current_task.task[int(right_answer.answer)].upper()
+            else:
+                index = current_task.task.index('...')
+                first = current_task.task[:index]
+                second = current_task.task[index + 3:]
+                right_letter = right_answer.answer.upper()
+            db_ses.commit()
+            return jsonify(
+                {'answers': answers, 'type_task': task.type_task, 'task_pos': task_pos,
+                 'task': task.task, 'status': status, 'first': first, 'second': second,
+                 'right_letter': right_letter})
+        else:
+            db_ses.commit()
+            if answer == '-1':
+                return {'answers': answers, 'type_task': task.type_task, 'task_pos': task_pos,
+                        'task': db_ses.query(Task).get(tasks[task_pos]).task, 'status': status}
+            return jsonify(
+                {'answers': answers, 'type_task': task.type_task, 'task_pos': task_pos,
+                 'task': db_ses.query(Task).get(tasks[task_pos]).task, 'status': status})
 
 
 @app.route('/api/get-subthemes/<int:test_id>')
@@ -230,11 +273,15 @@ def create_task(subtheme_id, task_p, type_task, answers):
     task.task = task_p
     task.subtheme_id = subtheme_id
     task.type_task = type_task
-    if type_task == 0:
+    answers = answers.split('|')
+    for i in range(len(answers)):
         answer = Answer()
-        answer.answer = answers
+        answer.answer = answers[i]
         answer.task_id = task.id
-        answer.right = 1
+        if not i:
+            answer.right = 1
+        else:
+            answer.right = 0
         db_ses.add(answer)
         task.answers.append(answer)
     db_ses.add(task)

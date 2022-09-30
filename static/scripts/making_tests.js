@@ -74,11 +74,11 @@ $(document).ready(function () {
     }
 
     function set_type_task(type_task) {
-        right = -1
         selected = $(type_task).val()
         create_new_task = $("#create_new_task")
         create_new_task.empty()
         if (selected == "0") {
+            right = -1
             create_new_task.append(`
                 <h3 class="d-inline-block">Слово: </h3>
                 <input id="input_new_task" type="text" class="d-inline-block m-left" onkeyup="view_task()">
@@ -86,7 +86,36 @@ $(document).ready(function () {
                 <h3 class="d-inline-block">Выберите букву(верную): </h3><div id="choose_right_letter"></div>
             `)
         } else {
-            create_new_task.append("Иначе")
+            right = -2
+            create_new_task.append(`
+                <h3 class=\"d-inline-block\">Слово(пропуск обощначьте '...'): </h3>
+                <input id="input_new_task" type="text" class="d-inline-block m-left">
+                <br />
+                <h3 class=\"d-inline-block\">Вариант ответа: </h3>
+                <input id="input_new_answer" type="text" class="d-inline-block m-left">
+                <input onclick="add_answer($('#input_new_answer').val())" class="form-control btn btn-success btn_next d-inline-block m-left" type="submit" value="Добавить">
+                <div id="answer-list">
+                    
+                </div>
+            `)
+            answerList = $("#answer-list")
+            queue_answers = []
+            answerList.on('click', ".delete-link-tag", function () {
+                $("#" + $(this).attr('data-id-tag')).remove()
+                text = $(this).attr('data-id-tag').split("tag")[1]
+                queue_answers.splice(queue_answers.indexOf(text), 1)
+
+            })
+            answerList.on('click', ".new_post_tag_right", function () {
+                if (queue_answers.length >= 2) {
+                    $("#text_tag" + queue_answers[0]).removeClass('new_post_tag_text_right')
+                    document.getElementById("text_tag" + queue_answers[0]).classList.add('new_post_tag_text')
+                }
+                $("#text_" + $(this).attr('data-id-tag')).removeClass('new_post_tag_text')
+                document.getElementById("text_" + $(this).attr('data-id-tag')).classList.add('new_post_tag_text_right')
+                text = $(this).attr('data-id-tag').split("tag")[1]
+                queue_answers.splice(0, 0, queue_answers.splice(queue_answers.indexOf(text), 1)[0]);
+            })
         }
     }
 
@@ -157,17 +186,44 @@ $(document).ready(function () {
     }
 
     function make_task() {
-        if (right != -1) {
-            test_id = $('#select_themes').find('option:selected').attr('data-test-id')
-            task = $('#input_new_task').val()
-            subtheme_id = $('#select_subthemes').find('option:selected').attr('data-subtheme-id')
-            type_task = $('.js-select2-type-task').val()
-            fetch(`/api/create-task/${subtheme_id}/${task}/${type_task}/${right}`)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((myjson) => {
-                });
+        test_id = $('#select_themes').find('option:selected').attr('data-test-id')
+        task = $('#input_new_task').val()
+        subtheme_id = $('#select_subthemes').find('option:selected').attr('data-subtheme-id')
+        type_task = $('.js-select2-type-task').val()
+        if (right == -2) {
+            answers = queue_answers.join('|')
+            fetch(`/api/create-task/${subtheme_id}/${task}/${type_task}/${answers}`)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((myjson) => {
+                    });
+        } else {
+            if (right != -1) {
+                fetch(`/api/create-task/${subtheme_id}/${task}/${type_task}/${right}`)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((myjson) => {
+                    });
+            }
+        }
+
+    }
+
+
+    function add_answer(text) {
+        if (!queue_answers.includes(text)) {
+            answerList.append(`
+            <div class="input-group mb-3 new_post_tag" id="tag` + text + `">
+            <span class="input-group-text new_post_tag_text" id="text_tag${text}">` + text + `</span>
+            <span class="delete-link-tag new_post_tag_delete"
+                  title="Delete" data-id-tag="tag` + text + `">X</span>
+            <span class="new_post_tag_right"
+                  title="Right" data-id-tag="tag` + text + `">V</span>
+            </div>
+            `)
+            queue_answers.push(text)
         }
     }
 
@@ -196,4 +252,5 @@ $(document).ready(function () {
     window.set_subthemes = set_subthemes
     window.create_theme = create_theme
     window.create_subtheme = create_subtheme
+    window.add_answer = add_answer
 })
