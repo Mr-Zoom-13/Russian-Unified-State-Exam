@@ -4,7 +4,7 @@ $(document).ready(function () {
 
     function open_your_tests() {
         parent = $('#parent')
-        parent.append(`
+        parent.append(`<a href="/main"><input class="form-control btn btn-success btn_next back_button" type="submit" value="← На главную"></a>
             <div class="create-thing">
                 <h1 class="h1_title">Создать тему</h1>
                 <div class="tests_themes d-inline-block">

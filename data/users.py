@@ -13,9 +13,11 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     surname = sqlalchemy.Column(sqlalchemy.String)
     name = sqlalchemy.Column(sqlalchemy.String)
-    tasks = sqlalchemy.Column(sqlalchemy.String)
+    tasks = sqlalchemy.Column(sqlalchemy.String, default='[]')
     success = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     resolved = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    test_id = sqlalchemy.Column(sqlalchemy.Integer)
+    subtheme_id = sqlalchemy.Column(sqlalchemy.Integer)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

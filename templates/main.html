@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% block content%}
+<div class="manage_icon">
+    <a href="/profile"><div class="profile"></div></a>
+    <a href="/making-tests"><div class="making-tests"></div></a>
+    <a href="/admin"><div class="settings"></div></a>
+</div>
 <div id="parent">
 
 </div>
+{% if continue_task is defined %}
+<p data-test-id="{{ test_id }}" data-subtheme-id="{{ subtheme_id }}" data-task-pos="{{ task_pos }}" data-task="{{ task }}" id="continue_task" hidden></p>
+{% endif %}
 {% endblock %}

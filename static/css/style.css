@@ -21,7 +21,7 @@
 }
 
 .tests_themes {
-    margin-left: 30%;
+    margin-left: 27%;
 }
 
 .test_theme_and_subtheme:hover {
@@ -89,3 +89,62 @@
     color: #58a70a;
     font-size: 40px;
 }
+
+.back_button {
+    position: absolute;
+}
+
+.h1_description {
+    color: black!important;
+    font-size: 38px!important;
+}
+
+.description {
+    width: 47%;
+}
+
+.description h3 {
+    word-wrap: break-word;
+}
+
+.manage_icon {
+    position: absolute;
+    left: 88%;
+}
+
+.manage_icon div {
+    width: 50px;
+    height: 50px;
+    float: right;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.settings {
+    background: url("/static/img/settings.png");
+}
+
+.settings:hover {
+    background: url("/static/img/settings_hover.png");
+}
+
+.making-tests {
+    background: url("/static/img/making_tests.png");
+}
+
+.making-tests:hover {
+    background: url("/static/img/making_tests_hover.png");
+}
+
+.profile {
+    background: url("/static/img/profile.png");
+}
+
+.profile:hover {
+    background: url("/static/img/profile_hover.png");
+}
+
+.test_theme_and_subtheme {
+    width: fit-content;
+}
+

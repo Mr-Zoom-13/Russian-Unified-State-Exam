@@ -1,6 +1,23 @@
 $(document).ready(function () {
-    open_tests()
     vowels = "аеёиоуыэюя"
+    continue_task = $("#continue_task")
+    console.log(continue_task)
+    if (continue_task.val() != undefined) {
+        if (confirm("Хотите продолжить прошлое тестирование?")) {
+            myjson = {}
+            myjson.task = continue_task.attr('data-task')
+            myjson.task_pos = continue_task.attr('data-task-pos')
+            test_id = continue_task.attr('data-test-id')
+            subtheme_id = continue_task.attr('data-subtheme-id')
+            create_task(myjson)
+        }
+        else {
+           open_tests()
+        }
+    }
+    else {
+        open_tests()
+    }
 
     // get the real id of user
     fetch('/api/get-user-id')
@@ -21,12 +38,32 @@ $(document).ready(function () {
                 subthemes = myjson.test.subthemes
                 parent = $('#parent')
                 parent.empty()
-                parent.append(`<h1 class="h1_title">Подтемы тестов</h1><div class="tests_themes"></div>`)
+                parent.append(`<input onclick="open_tests()" class="form-control btn btn-success btn_next back_button" type="submit" value="← Назад"><h1 class="h1_title">Подтемы тестов</h1><div class="tests_themes"></div>`)
                 parent_div = $('.tests_themes')
                 for (var i = 0; i < subthemes.length; i++) {
-                    parent_div.append(`<h1 class="test_theme_and_subtheme" data-test-id="${myjson.test.id}" data-subtheme-id="${subthemes[i].id}" onclick="start_testing(this)">${i + 1}. ${subthemes[i].title}</h1>`)
+                    parent_div.append(`<h1 class="test_theme_and_subtheme" data-test-id="${myjson.test.id}" data-subtheme-id="${subthemes[i].id}" data-subtheme-description="${subthemes[i].description}" data-subtheme-title="${subthemes[i].title}" onclick="show_description(this)">${i + 1}. ${subthemes[i].title}</h1>`)
                 }
             });
+    }
+
+    function show_description(this_) {
+        parent = $('#parent')
+        parent.empty()
+        test_id = $(this_).attr('data-test-id')
+        subtheme_id = $(this_).attr('data-subtheme-id')
+        subtheme_description = $(this_).attr('data-subtheme-description')
+        subtheme_title = $(this_).attr('data-subtheme-title')
+        parent.append(`
+            <input data-test-id="${test_id}" data-subtheme-id="${subtheme_id}" onclick="open_test(this)" class="form-control btn btn-success btn_next back_button" type="submit" value="← Назад">
+            <h1 class="h1_title">${subtheme_title}</h1><h1 class="h1_title h1_description">Описание</h1>
+            <div class="tests_themes description">
+                <h3>${subtheme_description}</h3>
+            </div>
+            <br />
+            <div class="tests_themes">
+                <input data-test-id="${test_id}" data-subtheme-id="${subtheme_id}" onclick="start_testing(this)" class="form-control btn btn-success btn_next back_button" type="submit" value="Начать тестирование">
+            </div>
+        `)
     }
 
     function start_testing(this_) {
@@ -83,7 +120,8 @@ function create_task(myjson) {
     } else {
         task_pos = Number(myjson.task_pos)
         task = myjson.task
-        parent.append(`<h3 class="task_description">${task_description}</h3><div class="task_div"></div>`)
+        console.log(myjson)
+        parent.append(`<h3 class="task_description"></h3><div class="task_div"></div>`)
         parent_div = $('.task_div')
         for (var i = 0; i < task.length; i++) {
             if (vowels.includes(task[i])) {
@@ -117,5 +155,6 @@ window.start_testing = start_testing
 window.check_right_answer = check_right_answer
 window.create_task = create_task
 window.open_tests = open_tests
+window.show_description = show_description
 })
 

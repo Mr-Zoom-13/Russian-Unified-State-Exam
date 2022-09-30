@@ -1,6 +1,8 @@
 import random
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 from flask import Flask, render_template, redirect, session, jsonify
-from flask_login import LoginManager, login_required, logout_user, login_user
+from flask_login import LoginManager, login_required, logout_user, login_user, current_user
 from sqlalchemy import inspect
 from data import db_session
 from forms.login import LoginForm
@@ -16,6 +18,15 @@ app.secret_key = 'very secret key pam'
 app.config['JSON_AS_ASCII'] = False
 login_manager = LoginManager()
 login_manager.init_app(app)
+admin = Admin(app)
+
+
+class MyModelView(ModelView):
+    def is_accessible(self):
+        if hasattr(current_user, 'id'):
+            if current_user.id == 1:
+                return True
+        return False
 
 
 def object_as_dict(obj):
@@ -38,6 +49,8 @@ def logout():
 
 @app.route('/', methods=['GET', 'POST'])
 def main_login_user():
+    if hasattr(current_user, 'id'):
+        return redirect('/main')
     form = LoginForm()
     if form.validate_on_submit():
         db_ses = db_session.create_session()
@@ -51,6 +64,8 @@ def main_login_user():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
+    if hasattr(current_user, 'id'):
+        return redirect('/main')
     form = RegisterForm()
     if form.validate_on_submit():
         db_ses = db_session.create_session()
@@ -71,11 +86,16 @@ def register_user():
 
 
 @app.route('/main')
+@login_required
 def main_page():
+    if eval(current_user.tasks):
+        db_ses = db_session.create_session()
+        return render_template('main.html', continue_task=1, task_pos=current_user.resolved, task=db_ses.query(Task).get(eval(current_user.tasks)[current_user.resolved]).task, test_id=current_user.test_id, subtheme_id=current_user.subtheme_id)
     return render_template('main.html')
 
 
 @app.route('/making-tests')
+@login_required
 def making_tests():
     return render_template('main.html', making_tests=True)
 
@@ -112,6 +132,8 @@ def start_test(user_id, test_id, subtheme_id):
     user.tasks = str(tmp)
     user.success = 0
     user.resolved = 0
+    user.test_id = test_id
+    user.subtheme_id = subtheme_id
     db_ses.commit()
     next_task_dict = next_task(user_id, -1, '-1')
     next_task_dict['description'] = f.description
@@ -222,4 +244,11 @@ def create_task(subtheme_id, task_p, type_task, answers):
 
 if __name__ == '__main__':
     db_session.global_init('db/rus.db')
+    db_sess = db_session.create_session()
+    admin.add_view(MyModelView(User, db_sess))
+    admin.add_view(MyModelView(Test, db_sess))
+    admin.add_view(MyModelView(Subtheme, db_sess))
+    admin.add_view(MyModelView(Task, db_sess))
+    admin.add_view(MyModelView(Answer, db_sess))
+    db_sess.close()
     app.run(port=5005)
