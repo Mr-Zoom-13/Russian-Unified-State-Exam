@@ -1,3 +1,4 @@
+import datetime
 import random
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -12,6 +13,8 @@ from data.tests import Test
 from data.subthemes import Subtheme
 from data.tasks import Task
 from data.answers import Answer
+from data.logs import Log
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.secret_key = 'very secret key pam'
@@ -98,14 +101,56 @@ def main_page():
         return render_template('main.html', continue_task=1, task_pos=current_user.resolved,
                                task=task.task, test_id=current_user.test_id,
                                subtheme_id=current_user.subtheme_id, type_task=task.type_task,
-                               answers=answers)
-    return render_template('main.html')
+                               answers=answers, id=current_user.id, main=True)
+    return render_template('main.html', id=current_user.id, main=True)
 
 
 @app.route('/making-tests')
 @login_required
 def making_tests():
-    return render_template('main.html', making_tests=True)
+    if current_user.id == 1:
+        return render_template('main.html', making_tests=True, id=1)
+    return redirect('/main')
+
+
+@app.route('/profile/<int:user_id>')
+@login_required
+def profile(user_id):
+    if current_user.id == user_id:
+        db_ses = db_session.create_session()
+        user = db_ses.query(User).get(user_id)
+        logs = db_ses.query(Log).filter(Log.user_id == user_id).all()
+        logs.reverse()
+        refactored_logs = []
+        month = datetime.datetime.now().month
+        statistic_legend = ['5', '4', '3', '2']
+        statistic = [0, 0, 0, 0]
+        for log in logs:
+            prc = int(round(log.success / log.resolved, 2) * 100)
+            if log.date.month == month:
+                if prc >= 87:
+                    statistic[0] += 1
+                elif prc >= 66:
+                    statistic[1] += 1
+                elif prc >= 42:
+                    statistic[2] += 1
+                else:
+                    statistic[3] += 1
+            refactored_logs.append({'date': str(log.date), 'theme': log.test.title,
+                                    'subtheme': log.subtheme.title, 'success': log.success,
+                                    'resolved': log.resolved, 'prc': prc})
+        if statistic == [0, 0, 0, 0]:
+            return render_template('profile.html', id=current_user.id, email=user.email,
+                                   name=user.name, surname=user.surname, logs=logs,
+                                   no_stat=True)
+        else:
+            plt.pie(statistic, labels=statistic_legend)
+            plt.legend()
+            plt.savefig('static/img/1.png')
+            plt.close()
+            return render_template('profile.html', id=current_user.id, email=user.email,
+                                   name=user.name, surname=user.surname, logs=refactored_logs)
+    return redirect('/profile/' + str(current_user.id))
 
 
 # API
@@ -174,6 +219,13 @@ def next_task(user_id, task_pos, answer):
         user.success = 0
         user.resolved = 0
         user.tasks = '[]'
+        log = Log()
+        log.user_id = user.id
+        log.test_id = current_task.subtheme.test_id
+        log.subtheme_id = current_task.subtheme_id
+        log.success = success
+        log.resolved = resolved
+        db_ses.add(log)
         db_ses.commit()
         if status == 'wrong':
             if current_task.type_task == 0:

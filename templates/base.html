@@ -22,10 +22,10 @@
 </header>
 {% block content %}
 {% endblock %}
-{% if not making_tests is defined %}
-<script src="../static/scripts/main.js"></script>
-{% else %}
+{% if making_tests is defined %}
 <script src="../static/scripts/making_tests.js"></script>
+{% elif main is defined %}
+<script src="../static/scripts/main.js"></script>
 {% endif %}
 </body>
 </html>

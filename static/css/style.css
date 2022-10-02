@@ -202,3 +202,16 @@
 .back_wrong_answer {
     background-color: red!important;
 }
+
+
+.marg_l_10 {
+    margin-left: 10px;
+}
+
+.history_statistics {
+    width: 50%;
+    height: 210px;
+    margin-left: 25%;
+    border: 1px solid black;
+    overflow-y: scroll;
+}

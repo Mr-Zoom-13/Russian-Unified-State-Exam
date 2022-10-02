@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content%}
 <div class="manage_icon">
-    <a href="/profile"><div class="profile"></div></a>
-    <a href="/making-tests"><div class="making-tests"></div></a>
-    <a href="/admin"><div class="settings"></div></a>
+    <a href="/profile/{{ id }}"><div class="profile"></div></a>
+    {% if id == 1 %}
+        <a href="/making-tests"><div class="making-tests"></div></a>
+        <a href="/admin"><div class="settings"></div></a>
+    {% endif %}
 </div>
 <div id="parent">
 

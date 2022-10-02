@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="manage_icon">
+    <a href="/profile/{{ id }}"><div class="profile"></div></a>
+    {% if id == 1 %}
+        <a href="/making-tests"><div class="making-tests"></div></a>
+        <a href="/admin"><div class="settings"></div></a>
+    {% endif %}
+</div>
+<a href="/main"><input class="form-control btn btn-success btn_next back_button" type="submit" value="← На главную"></a>
+<h1 class="h1_title">Профиль</h1>
+<div class="tests_themes">
+    <h3 class="d-inline-block">Почта </h3><input type="text" class="marg_l_10 d-inline-block" value="{{ email }}"><br />
+    <h3 class="d-inline-block">Имя </h3><input type="text" class="marg_l_10 d-inline-block" value="{{ name }}"><br />
+    <h3 class="d-inline-block">Фамилия</h3><input type="text" class="marg_l_10 d-inline-block" value="{{ surname }}"><br />
+    <input class="form-control btn btn-success btn_next d-inline-block m-left" type="submit" value="Изменить">
+</div>
+<h1 class="h1_title">Статистика(за этот месяц)</h1>
+<div class="text-center">
+    {% if no_stat is defined %}
+        <h2 class="h1_title">К сожалению, за этот месяц вы не прошли ни одного теста! :(</h2>
+    {% else %}
+        <img src="/static/img/1.png" alt="Статистика">
+    {% endif %}
+</div>
+<h1 class="h1_title">История</h1>
+<div class="text-center history_statistics">
+    <table class="table table-striped">
+    <tr><th>Дата</th><th>Тема</th><th>Подтема</th><th>Правильно</th><th>Решено</th><th>Процент</th></tr>
+    {% for log in logs %}
+        <tr>
+            <td>{{ log.date }}</td>
+            <td>{{ log.theme }}</td>
+            <td>{{ log.subtheme }}</td>
+            <td>{{ log.success }}</td>
+            <td>{{ log.resolved }}</td>
+            {% if log.prc >= 87 %}
+                <td class="table-success">{{ log.prc }}</td>
+            {% elif log.prc >= 66 %}
+                <td class="table-primary">{{ log.prc }}</td>
+            {% elif log.prc >= 42 %}
+                <td class="table-warning">{{ log.prc }}</td>
+            {% else %}
+                <td class="table-danger">{{ log.prc }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+</div>
+<br />
+<br />
+{% endblock %}
