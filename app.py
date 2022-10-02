@@ -15,6 +15,7 @@ from data.tasks import Task
 from data.answers import Answer
 from data.logs import Log
 import matplotlib.pyplot as plt
+from waitress import serve
 
 app = Flask(__name__)
 app.secret_key = 'very secret key pam'
@@ -27,6 +28,7 @@ admin = Admin(app)
 @app.route('/test')
 def tusti():
     return render_template('test.html')
+
 
 class MyModelView(ModelView):
     def is_accessible(self):
@@ -358,4 +360,4 @@ if __name__ == '__main__':
     admin.add_view(MyModelView(Task, db_sess))
     admin.add_view(MyModelView(Answer, db_sess))
     db_sess.close()
-    app.run(port=5005)
+    serve(app, host='0.0.0.0', port=5002)
