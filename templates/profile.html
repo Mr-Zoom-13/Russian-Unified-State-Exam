@@ -9,12 +9,14 @@
 </div>
 <a href="/main"><input class="form-control btn btn-success btn_next back_button" type="submit" value="← На главную"></a>
 <h1 class="h1_title">Профиль</h1>
-<div class="tests_themes">
-    <h3 class="d-inline-block">Почта </h3><input type="text" class="marg_l_10 d-inline-block" value="{{ email }}"><br />
-    <h3 class="d-inline-block">Имя </h3><input type="text" class="marg_l_10 d-inline-block" value="{{ name }}"><br />
-    <h3 class="d-inline-block">Фамилия</h3><input type="text" class="marg_l_10 d-inline-block" value="{{ surname }}"><br />
-    <input class="form-control btn btn-success btn_next d-inline-block m-left" type="submit" value="Изменить">
-</div>
+<form method="post">
+    <div class="tests_themes">
+        <h3 class="d-inline-block">Почта </h3><input disabled name="email" type="text" class="marg_l_10 d-inline-block" value="{{ email }}"><br />
+        <h3 class="d-inline-block">Имя </h3><input name="name" type="text" class="marg_l_10 d-inline-block" value="{{ name }}"><br />
+        <h3 class="d-inline-block">Фамилия</h3><input name="surname" type="text" class="marg_l_10 d-inline-block" value="{{ surname }}"><br />
+        <input class="form-control btn btn-success btn_next d-inline-block m-left" type="submit" value="Изменить">
+    </div>
+</form>
 <h1 class="h1_title">Статистика(за этот месяц)</h1>
 <div class="text-center">
     {% if no_stat is defined %}

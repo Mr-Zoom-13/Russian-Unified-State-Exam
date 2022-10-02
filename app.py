@@ -2,7 +2,7 @@ import datetime
 import random
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from flask import Flask, render_template, redirect, session, jsonify
+from flask import Flask, render_template, redirect, session, jsonify, request
 from flask_login import LoginManager, login_required, logout_user, login_user, current_user
 from sqlalchemy import inspect
 from data import db_session
@@ -23,6 +23,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 admin = Admin(app)
 
+
+@app.route('/test')
+def tusti():
+    return render_template('test.html')
 
 class MyModelView(ModelView):
     def is_accessible(self):
@@ -113,12 +117,16 @@ def making_tests():
     return redirect('/main')
 
 
-@app.route('/profile/<int:user_id>')
+@app.route('/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
     if current_user.id == user_id:
         db_ses = db_session.create_session()
         user = db_ses.query(User).get(user_id)
+        if request.method == 'POST':
+            user.name = request.form.get('name')
+            user.surname = request.form.get('surname')
+            db_ses.commit()
         logs = db_ses.query(Log).filter(Log.user_id == user_id).all()
         logs.reverse()
         refactored_logs = []

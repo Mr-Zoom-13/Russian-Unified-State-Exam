@@ -93,7 +93,7 @@ $(document).ready(function () {
                 <br />
                 <h3 class=\"d-inline-block\">Вариант ответа: </h3>
                 <input id="input_new_answer" type="text" class="d-inline-block m-left">
-                <input onclick="add_answer($('#input_new_answer').val())" class="form-control btn btn-success btn_next d-inline-block m-left" type="submit" value="Добавить">
+                <input onclick="add_answer($('#input_new_answer').val());$('#input_new_answer').val('')" class="form-control btn btn-success btn_next d-inline-block m-left" type="submit" value="Добавить">
                 <div id="answer-list">
                     
                 </div>
@@ -158,6 +158,7 @@ $(document).ready(function () {
 
     function create_theme() {
         title = $('#input_theme_title').val()
+        $('#input_theme_title').val('')
         fetch('/api/create-theme/' + title)
             .then((response) => {
                 return response.json();
@@ -166,6 +167,9 @@ $(document).ready(function () {
                 if (myjson.status == 200) {
                     $("#select_themes").append(`<option data-test-id="${myjson.Id}" >${title}</option>`)
                     $("#select_themes2").append(`<option data-test-id="${myjson.Id}" >${title}</option>`)
+                    show_this("Тема успешно создана!", 'success')
+                } else {
+                    show_this("Ошибка!", 'wrong')
                 }
             });
     }
@@ -174,13 +178,20 @@ $(document).ready(function () {
         test_id = $('#select_themes').find('option:selected').attr('data-test-id')
         title = $('#input_subtheme_title').val()
         description = $('#input_subtheme_description').val()
+        $('#input_subtheme_title').val('')
+        $('#input_subtheme_description').val('')
         fetch(`/api/create-subtheme/${test_id}/${title}/${description}`)
             .then((response) => {
                 return response.json();
             })
             .then((myjson) => {
-                if (myjson.status == 200 && test_id == $('#select_themes2').find('option:selected').attr('data-test-id')) {
-                    $("#select_subthemes").append(`<option>${title}</option>`)
+                if (myjson.status == 200) {
+                    if (test_id == $('#select_themes2').find('option:selected').attr('data-test-id')) {
+                        $("#select_subthemes").append(`<option>${title}</option>`)
+                    }
+                    show_this('Подтема успешно создана!', 'success')
+                } else {
+                    show_this('Ошибка!', 'wrong')
                 }
             });
     }
@@ -188,16 +199,28 @@ $(document).ready(function () {
     function make_task() {
         test_id = $('#select_themes').find('option:selected').attr('data-test-id')
         task = $('#input_new_task').val()
+        $('#input_new_task').val('')
         subtheme_id = $('#select_subthemes').find('option:selected').attr('data-subtheme-id')
         type_task = $('.js-select2-type-task').val()
+        if (type_task == 0) {
+            $("#choose_right_letter").empty()
+        }
+        else {
+            $("#answer-list").empty()
+        }
         if (right == -2) {
             answers = queue_answers.join('|')
             fetch(`/api/create-task/${subtheme_id}/${task}/${type_task}/${answers}`)
-                    .then((response) => {
-                        return response.json();
-                    })
-                    .then((myjson) => {
-                    });
+                .then((response) => {
+                    return response.json();
+                })
+                .then((myjson) => {
+                    if (myjson.status == 200) {
+                        show_this("Задача успешно создана!", 'success')
+                    } else {
+                        show_this("Ошибка!", 'wrong')
+                    }
+                });
         } else {
             if (right != -1) {
                 fetch(`/api/create-task/${subtheme_id}/${task}/${type_task}/${right}`)
@@ -205,6 +228,11 @@ $(document).ready(function () {
                         return response.json();
                     })
                     .then((myjson) => {
+                        if (myjson.status == 200) {
+                            show_this("Задача успешно создана!", 'success')
+                        } else {
+                            show_this("Ошибка!", 'wrong')
+                        }
                     });
             }
         }
@@ -254,3 +282,23 @@ $(document).ready(function () {
     window.create_subtheme = create_subtheme
     window.add_answer = add_answer
 })
+
+function show_this(text, theme) {
+    nots = $('#notifications')
+    if (theme == 'success') {
+        var this_ = $(`<div class="not">
+        <span class="input-group-text new_post_tag_text not_text"><span class="not_title">Уведомление</span><br />${text}</span></div><br/>`)
+    } else {
+        var this_ = $(`<div class="not">
+        <span class="input-group-text new_post_tag_text not_text_wrong"><span class="not_title">Уведомление</span><br />${text}</span></div><br/>`)
+    }
+    nots.append(this_)
+    this_.fadeIn()
+    setTimeout(delete_not, 2000)
+
+    function delete_not() {
+        this_.fadeOut('slow', function () {
+            $(this).remove()
+        })
+    }
+}

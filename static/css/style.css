@@ -66,7 +66,7 @@
 }
 
 .task_again {
-    background-color: darkorange!important;
+    background-color: darkorange !important;
 }
 
 .m-left {
@@ -96,8 +96,8 @@
 }
 
 .h1_description {
-    color: black!important;
-    font-size: 38px!important;
+    color: black !important;
+    font-size: 38px !important;
 }
 
 .description {
@@ -150,9 +150,6 @@
 }
 
 
-
-
-
 .new_post_tag {
     display: inline-block !important;
     width: initial !important;
@@ -196,11 +193,11 @@
 }
 
 .choose_hover:hover {
-    background-color: #58a70a!important;
+    background-color: #58a70a !important;
 }
 
 .back_wrong_answer {
-    background-color: red!important;
+    background-color: red !important;
 }
 
 
@@ -214,4 +211,29 @@
     margin-left: 25%;
     border: 1px solid black;
     overflow-y: scroll;
+}
+
+
+.not_title {
+    float: left;
+}
+
+.not_text {
+    background-color: #58a70a !important;
+    border-radius: 13%;
+}
+
+.not_text_wrong {
+    background-color: red !important;
+    border-radius: 13%;
+}
+
+.not {
+    float: right;
+    margin-right: 1%;
+    display: none;
+}
+
+#notifications {
+    float: right;
 }
