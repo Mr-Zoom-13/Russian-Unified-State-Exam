@@ -64,7 +64,7 @@ def main_login_user():
     if form.validate_on_submit():
         db_ses = db_session.create_session()
         user = db_ses.query(User).filter(User.email == form.email.data).first()
-        if user.check_password(form.password.data):
+        if user and user.check_password(form.password.data):
             login_user(user)
             session['user_id'] = user.id
             return redirect('/main')
