@@ -9,7 +9,7 @@ class Task(SqlAlchemyBase, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
     subtheme_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('subthemes.id'))
-    task = sqlalchemy.Column(sqlalchemy.String, unique=True)
+    task = sqlalchemy.Column(sqlalchemy.String)
     type_task = sqlalchemy.Column(sqlalchemy.Integer)
     subtheme = orm.relation('Subtheme', back_populates="tasks")
     answers = orm.relationship('Answer', back_populates="task")
