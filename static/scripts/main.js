@@ -135,11 +135,18 @@ $(document).ready(function () {
             task_pos = Number(myjson.task_pos)
             task = myjson.task
             console.log(myjson)
+            var flag = false
             if (myjson.type_task == 0) {
                 parent.append(`<h3 class="task_description">Выберите нужную букву и нажмите на неё для выбора ответа.</h3><div class="task_div"></div>`)
                 parent_div = $('.task_div')
                 for (var i = 0; i < task.length; i++) {
-                    if (vowels.includes(task[i])) {
+                    if (task[i] === '(') {
+                        flag = true
+                    }
+                    if (task[i] === ')') {
+                        flag = false
+                    }
+                    if (vowels.includes(task[i]) && flag === false) {
                         parent_div.append(`<h2 class="task can_choose_task" id="d${i}" data-symbol='${i}' onclick="check_right_answer(this)">${task[i]}</h2>`)
                     } else {
                         parent_div.append(`<h2 class="task">${task[i]}</h2>`)
