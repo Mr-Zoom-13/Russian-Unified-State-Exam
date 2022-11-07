@@ -237,3 +237,11 @@
 #notifications {
     float: right;
 }
+
+#icon {
+    background-image: url('/static/img/icon_without_fon.png');
+}
+
+.w-50 {
+    width: 50px!important;
+}

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="MobileOptimized" content="320">
-    <title>{{ title }}</title>
+    <title>ZoomEGE</title>
+    <link rel="icon" type="image/png" href="/static/img/icon_without_fon.png">
     <link rel="stylesheet"
                         href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
                         integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
@@ -17,7 +18,11 @@
 </head>
 <body>
 <header>
-    <h1 class="title_app">ZoomЕГЭ</h1>
+    <div class="title_app">
+        <table>
+            <tr><td><img class="w-50" src='/static/img/icon_without_fon.png'></td><td><h1 class="title_app">ZoomEGE</h1></td></tr>
+        </table>
+    </div>
 </header>
 {% block content %}
 {% endblock %}
