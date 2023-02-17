@@ -38,6 +38,10 @@ class MyModelView(ModelView):
         return False
 
 
+class TaskModelView(MyModelView):
+    column_searchable_list = ['task', 'id']
+
+
 def object_as_dict(obj):
     return {c.key: getattr(obj, c.key)
             for c in inspect(obj).mapper.column_attrs}
@@ -357,7 +361,7 @@ if __name__ == '__main__':
     admin.add_view(MyModelView(User, db_ses))
     admin.add_view(MyModelView(Test, db_ses))
     admin.add_view(MyModelView(Subtheme, db_ses))
-    admin.add_view(MyModelView(Task, db_ses))
+    admin.add_view(TaskModelView(Task, db_ses))
     admin.add_view(MyModelView(Answer, db_ses))
     admin.add_view(MyModelView(Log, db_ses))
     db_ses.close()
