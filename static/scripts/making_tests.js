@@ -207,7 +207,6 @@ $(document).ready(function () {
         }
         else {
             $("#answer-list").empty()
-            queue_answers = []
         }
         if (right == -2) {
             answers = queue_answers.join('|')
@@ -237,7 +236,7 @@ $(document).ready(function () {
                     });
             }
         }
-
+        queue_answers = []
     }
 
 
